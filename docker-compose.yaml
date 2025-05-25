@@ -62,7 +62,7 @@ services:
       - coolify-net
     ports:
       - 5555:5555
-    env_file: .env
+    # env_file: .env
     environment:
       - DATABASE_URL=postgres://${DB_POSTGRESDB_USER}:${DB_POSTGRESDB_PASSWORD}@postgres:${DB_POSTGRESDB_PORT}/${POSTGRES_DB}
       - DATABASE_DIRECT_URL=${DATABASE_URL}
