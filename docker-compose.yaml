@@ -3,10 +3,6 @@
 volumes:
   database-data:
 
-networks:
-  stack:
-    name: stack
-    external: false
 
 services:
   database:
@@ -17,7 +13,7 @@ services:
       - database-data:/var/lib/postgresql/data/
     env_file: .env
     networks:
-      - stack
+      - coolify-net
 
   calcom:
     image: calcom.docker.scarf.sh/calcom/cal.com
@@ -33,12 +29,18 @@ services:
         CALENDSO_ENCRYPTION_KEY: ${CALENDSO_ENCRYPTION_KEY}
         DATABASE_URL: ${DATABASE_URL}
         DATABASE_DIRECT_URL: ${DATABASE_URL}
-      network: stack
+      network: coolify-net
     restart: always
+    labels:
+      - traefik.enable=true
+      - 'traefik.http.routers.calcom.rule=Host("calcom.biocentra.eu")'
+      - traefik.http.routers.calcom.tls.certresolver=letsencrypt
+      - traefik.http.services.calcom.loadbalancer.server.port=3000
+      - traefik.http.routers.calcom.entrypoints=https
     networks:
-      - stack
-    ports:
-      - 3000:3000
+      - coolify-net
+    # ports:
+    #   - 3000:3000
     env_file: .env
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DATABASE_HOST}/${POSTGRES_DB}
@@ -51,7 +53,7 @@ services:
     image: calcom.docker.scarf.sh/calcom/cal.com
     restart: always
     networks:
-      - stack
+      - coolify-net
     ports:
       - 5555:5555
     env_file: .env
@@ -64,4 +66,8 @@ services:
       - npx
       - prisma
       - studio
+
+  networks:
+    coolify-net:
+      external: true
 # END SECTION: Optional use of Prisma Studio.
